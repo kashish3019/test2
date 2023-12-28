@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>home</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul class="row">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="signup.html">Signup</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section class="display container">
+        <div id="box"></div>
+    </section>
+</body>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const handleAmount = async (amount) => {
+        console.log(amount)
+        let res = await fetch(`http://localhost:8090/product/payment`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ amount: amount })
+        })
+        let order = await res.json();
+        console.log(order)
+        let option = {
+            key: 'rzp_test_7Grqtls4UrZJlU',
+            amount: amount
+        }
+        let razorplay = new Razorpay(option);
+        razorplay.open();
+    }
+
+    const display = (data) => {
+        document.getElementById("box").innerHTML = "";
+        data.map((ele) => {
+            title = document.createElement("h2");
+            title.innerHTML = `Title :${ele.title}`;
+
+            img = document.createElement("img");
+            img.src = ele.image;
+
+            desc = document.createElement("p");
+            desc.innerHTML = `desc :${ele.desc}`;
+
+            size = document.createElement("p");
+            size.innerHTML = `Size :${ele.size}`;
+
+            price = document.createElement("p");
+            price.innerHTML = `price :$${ele.price}`;
+
+            btn = document.createElement("button");
+            btn.innerHTML = "Buy Now"
+            btn.addEventListener("click", () => handleAmount(ele.price))
+
+            let boxImg = document.createElement("div");
+            boxImg.setAttribute("id","img")
+            boxImg.append(img);
+
+            let boxcontants = document.createElement("div")
+            boxcontants.setAttribute("id","contants")
+            boxcontants.append(title, desc, price, size, btn)
+
+            let div=document.createElement("div")
+            div.setAttribute("id","mainbox")
+            div.append(boxImg,boxcontants)
+            document.getElementById("box").append(div)
+
+        })
+    }
+
+    const get = () => {
+        fetch(`http://localhost:8090/product/allProducts`)
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data)
+                display(data)
+            })
+            .catch((err) => console.log(err))
+    }
+    get();
+</script>
